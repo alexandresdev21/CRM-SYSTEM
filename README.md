@@ -1,187 +1,86 @@
-# 🗂️ CRM Backend — Flask + SQLAlchemy + SQLite
+# CRM// Sistema de Gestão
 
-Sistema de CRM (Customer Relationship Management) com gestão de clientes e campanhas de marketing.
+![Banner](https://img.shields.io/badge/CRM-Sistema%20de%20Gestão-green?style=for-the-badge)
+![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 
----
-
-## 🏗️ Estrutura do Projeto
-
-```
-crm/
-├── app/
-│   ├── __init__.py          # App factory + extensões
-│   ├── models/
-│   │   └── __init__.py      # Todos os modelos SQLAlchemy
-│   └── routes/
-│       ├── clients.py       # CRUD de clientes + stats
-│       ├── contacts.py      # Contatos por cliente
-│       ├── campaigns.py     # Campanhas de marketing
-│       ├── interactions.py  # Histórico de interações
-│       └── tags.py          # Tags/labels
-├── tests/
-│   └── test_api.py          # Testes com pytest
-├── config.py                # Configurações por ambiente
-├── run.py                   # Entry point
-├── seed.py                  # Popular banco com dados de exemplo
-├── requirements.txt
-└── .env.example
-```
+> Sistema de gestão de clientes (CRM) com dashboard interativo, controle de campanhas, interações e muito mais.
 
 ---
 
-## 🚀 Instalação e Execução
+## 📸 Preview
+
+![Dashboard do CRM](./preview.png)
+
+---
+
+## ✨ Funcionalidades
+
+- 📊 **Dashboard** — Visão geral com métricas de clientes, campanhas e prospectos
+- 👥 **Clientes** — Cadastro e gerenciamento completo de clientes
+- 📣 **Campanhas** — Criação e acompanhamento de campanhas de marketing
+- 💬 **Interações** — Registro de interações com clientes
+- 🏷️ **Tags** — Organização e categorização por tags
+
+---
+
+## 🚀 Como rodar o projeto
+
+### Pré-requisitos
+
+- [Python 3.x](https://www.python.org/downloads/)
+- Navegador moderno (Chrome, Firefox, Edge)
+
+### Passo a passo
 
 ```bash
-# 1. Clone ou extraia o projeto
-cd crm
+# Clone o repositório
+git clone https://github.com/alexandresdev21/CRM-SYSTEM.git
 
-# 2. Crie um ambiente virtual
-python -m venv .venv
-source .venv/bin/activate        # Linux/Mac
-.venv\Scripts\activate           # Windows
+# Entre na pasta do projeto
+cd CRM-SYSTEM
 
-# 3. Instale as dependências
+# Instale as dependências do backend
 pip install -r requirements.txt
 
-# 4. Configure variáveis de ambiente
-cp .env.example .env
-
-# 5. Popule o banco com dados de exemplo
-python seed.py
-
-# 6. Inicie o servidor
-python run.py
+# Inicie o servidor
+python app.py
 ```
 
-Acesse: `http://localhost:5000`
+Agora acesse no navegador: **http://localhost:5000**
 
 ---
 
-## 📡 Endpoints da API
+## 🗂️ Estrutura do Projeto
 
-### 🔍 Health Check
-| Método | Rota          | Descrição         |
-|--------|--------------|-------------------|
-| GET    | /api/health  | Status da API     |
-
-### 👥 Clientes
-| Método | Rota                    | Descrição                        |
-|--------|------------------------|----------------------------------|
-| GET    | /api/clients/          | Lista clientes (com paginação)   |
-| POST   | /api/clients/          | Cria novo cliente                |
-| GET    | /api/clients/:id       | Detalhes do cliente              |
-| PUT    | /api/clients/:id       | Atualiza cliente                 |
-| DELETE | /api/clients/:id       | Remove cliente                   |
-| GET    | /api/clients/stats     | Estatísticas gerais              |
-
-**Query params para listagem:** `?status=ativo&search=joão&tag=VIP&page=1&per_page=20`
-
-### 📋 Contatos
-| Método | Rota                     | Descrição               |
-|--------|-------------------------|-------------------------|
-| GET    | /api/contacts/          | Lista (filtro client_id)|
-| POST   | /api/contacts/          | Cria contato            |
-| GET    | /api/contacts/:id       | Detalhe                 |
-| PUT    | /api/contacts/:id       | Atualiza                |
-| DELETE | /api/contacts/:id       | Remove                  |
-
-### 📣 Campanhas
-| Método | Rota                           | Descrição                        |
-|--------|-------------------------------|----------------------------------|
-| GET    | /api/campaigns/               | Lista campanhas                  |
-| POST   | /api/campaigns/               | Cria campanha                    |
-| GET    | /api/campaigns/:id            | Detalhes + clientes              |
-| PUT    | /api/campaigns/:id            | Atualiza                         |
-| DELETE | /api/campaigns/:id            | Remove                           |
-| POST   | /api/campaigns/:id/send       | Marca como enviada               |
-| POST   | /api/campaigns/:id/clients    | Adiciona clientes à campanha     |
-| GET    | /api/campaigns/stats          | Estatísticas                     |
-
-### 💬 Interações
-| Método | Rota                        | Descrição               |
-|--------|-----------------------------|-------------------------|
-| GET    | /api/interactions/          | Lista (filtro client_id)|
-| POST   | /api/interactions/          | Registra interação      |
-| PUT    | /api/interactions/:id       | Atualiza                |
-| DELETE | /api/interactions/:id       | Remove                  |
-
-### 🏷️ Tags
-| Método | Rota             | Descrição   |
-|--------|-----------------|-------------|
-| GET    | /api/tags/      | Lista tags  |
-| POST   | /api/tags/      | Cria tag    |
-| DELETE | /api/tags/:id   | Remove tag  |
-
----
-
-## 📦 Exemplos de Payload
-
-### Criar Cliente
-```json
-POST /api/clients/
-{
-  "name": "João Silva",
-  "email": "joao@empresa.com",
-  "phone": "(41) 99999-0000",
-  "company": "Empresa Ltda",
-  "status": "ativo",
-  "source": "indicação",
-  "tags": ["VIP", "Tech"]
-}
 ```
-
-### Criar Campanha
-```json
-POST /api/campaigns/
-{
-  "name": "Newsletter Março",
-  "description": "Novidades do mês",
-  "channel": "email",
-  "target_segment": "ativo",
-  "scheduled_at": "2025-03-01T09:00:00"
-}
-```
-
-### Registrar Interação
-```json
-POST /api/interactions/
-{
-  "client_id": 1,
-  "type": "reuniao",
-  "subject": "Apresentação de proposta",
-  "description": "Reunião de 1h com decisores.",
-  "outcome": "positivo"
-}
+CRM-SYSTEM/
+├── frontend/
+│   ├── index.html
+│   ├── css/
+│   └── js/
+├── backend/
+│   ├── app.py
+│   └── database.db
+└── README.md
 ```
 
 ---
 
-## 🧪 Testes
+## 🛠️ Tecnologias utilizadas
 
-```bash
-pip install pytest
-python tests/test_api.py
-```
+| Tecnologia | Uso |
+|------------|-----|
+| HTML5 + CSS3 | Interface do usuário |
+| JavaScript | Interatividade no frontend |
+| Python | Servidor backend |
+| SQLite | Banco de dados |
 
 ---
 
-## 🗄️ Modelos do Banco
+## 👨‍💻 Autor
 
-```
-Client ──── Contact (1:N)
-       ──── Interaction (1:N)
-       ──── Tag (N:N)  via client_tags
-       ──── Campaign (N:N)  via campaign_clients
-```
-
-### Status de Clientes
-`ativo` | `inativo` | `prospecto`
-
-### Tipos de Interação
-`email` | `ligacao` | `reuniao` | `whatsapp` | `outro`
-
-### Status de Campanha
-`rascunho` | `agendada` | `em_andamento` | `concluida` | `cancelada`
-
-### Canais de Campanha
-`email` | `sms` | `whatsapp` | `push`
+Feito por **Alexandre** — [@alexandresdev21](https://github.com/alexandresdev21)
