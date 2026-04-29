@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a38;
+    --accent: #00ff88;
+    --accent2: #7b5ea7;
+    --accent3: #ff6b35;
+    --text: #e8e8f0;
+    --text2: #8888aa;
+    --text3: #4a4a66;
+    --danger: #ff4466;
+    --warn: #ffaa00;
+    --success: #00cc66;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+  .logo-sub { font-size: 10px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  .nav { flex: 1; padding: 16px 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 24px;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,255,136,0.04); }
+  .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .status-bar {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .status-dot {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+    background: var(--bg2);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .content { padding: 32px; flex: 1; }
+
+  /* CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--text3); }
+  .stat-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-card.green::before { background: var(--accent); }
+  .stat-card.purple::before { background: var(--accent2); }
+  .stat-card.orange::before { background: var(--accent3); }
+  .stat-card.red::before { background: var(--danger); }
+
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; }
+  .stat-sub { font-size: 10px; color: var(--text2); margin-top: 6px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #00dd77; }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--text3); }
+  .btn-danger { background: rgba(255,68,102,0.1); color: var(--danger); border: 1px solid rgba(255,68,102,0.2); }
+  .btn-danger:hover { background: rgba(255,68,102,0.2); }
+  .btn-sm { padding: 5px 10px; font-size: 10px; }
+  .btn svg { width: 13px; height: 13px; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .table-actions { display: flex; gap: 8px; align-items: center; }
+
+  .search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    width: 200px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text3); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  td { padding: 12px 16px; font-size: 12px; vertical-align: middle; }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.5px;
+  }
+  .badge-ativo { background: rgba(0,255,136,0.1); color: var(--accent); }
+  .badge-inativo { background: rgba(255,68,102,0.1); color: var(--danger); }
+  .badge-prospecto { background: rgba(123,94,167,0.2); color: #a87fd4; }
+  .badge-rascunho { background: rgba(136,136,170,0.1); color: var(--text2); }
+  .badge-em_andamento { background: rgba(255,170,0,0.1); color: var(--warn); }
+  .badge-concluida { background: rgba(0,255,136,0.1); color: var(--accent); }
+  .badge-cancelada { background: rgba(255,68,102,0.1); color: var(--danger); }
+  .badge-agendada { background: rgba(255,107,53,0.1); color: var(--accent3); }
+
+  .tag-pill {
+    display: inline-flex; align-items: center;
+    padding: 2px 7px; border-radius: 3px;
+    font-size: 10px; font-weight: 500;
+    margin-right: 3px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 520px; max-width: 95vw;
+    max-height: 85vh; overflow-y: auto;
+    transform: translateY(16px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { color: var(--text); border-color: var(--text3); }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* FORM */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 10px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; }
+  .form-input, .form-select, .form-textarea {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-select { cursor: pointer; }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-select option { background: var(--bg3); }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .detail-item label { font-size: 10px; color: var(--text3); letter-spacing: 1.2px; text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .detail-item span { font-size: 13px; color: var(--text); }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center; padding: 60px 20px;
+    color: var(--text3); font-size: 12px;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 10px;
+    z-index: 500;
+    transform: translateY(80px);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    min-width: 260px;
+  }
+  .toast.show { transform: translateY(0); }
+  .toast.success { border-color: var(--accent); }
+  .toast.error { border-color: var(--danger); }
+  .toast-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .toast.success .toast-dot { background: var(--accent); }
+  .toast.error .toast-dot { background: var(--danger); }
+
+  /* LOADING */
+  .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 11px; }
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SECTION TABS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* INTERACTIONS LIST */
+  .interaction-item {
+    display: flex; gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .interaction-item:last-child { border-bottom: none; }
+  .interaction-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+    background: var(--bg3); border: 1px solid var(--border);
+  }
+  .interaction-body { flex: 1; }
+  .interaction-subject { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+  .interaction-desc { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .interaction-meta { font-size: 10px; color: var(--text3); display: flex; gap: 12px; }
+
+  /* CHART BAR */
+  .mini-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px; font-size: 11px;
+  }
+  .mini-bar-label { width: 80px; color: var(--text2); text-align: right; }
+  .mini-bar-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .mini-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.6s ease; }
+  .mini-bar-val { width: 30px; color: var(--text3); font-size: 10px; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .detail-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-text">CRM//</div>
+    <div class="logo-sub">Sistema de gestão</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showSection('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showSection('clientes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </div>
+    <div class="nav-item" onclick="showSection('campanhas')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Campanhas
+    </div>
+    <div class="nav-item" onclick="showSection('interacoes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Interações
+    </div>
+    <div class="nav-item" onclick="showSection('tags')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Tags
+    </div>
+  </nav>
+  <div class="status-bar">
+    <span class="status-dot"></span>API localhost:5000
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="page-title" id="page-title">Dashboard</div>
+    <div class="topbar-actions" id="topbar-actions"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="section active" id="section-dashboard">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card green"><div class="stat-label">Total Clientes</div><div class="stat-value" id="stat-total">—</div><div class="stat-sub">cadastrados</div></div>
+        <div class="stat-card purple"><div class="stat-label">Ativos</div><div class="stat-value" id="stat-ativos">—</div><div class="stat-sub">clientes ativos</div></div>
+        <div class="stat-card orange"><div class="stat-label">Campanhas</div><div class="stat-value" id="stat-campanhas">—</div><div class="stat-sub">criadas</div></div>
+        <div class="stat-card red"><div class="stat-label">Prospectos</div><div class="stat-value" id="stat-prospectos">—</div><div class="stat-sub">em avaliação</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Clientes por status</div></div>
+          <div style="padding:20px" id="chart-status"><div class="loading"><div class="spinner"></div><br>Carregando...</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><div class="table-title">Campanhas recentes</div></div>
+          <div style="padding:4px 0" id="dash-campaigns"><div class="loading"><div class="spinner"></div><br>Carregando...</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section class="section" id="section-clientes">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Todos os clientes</div>
+          <div class="table-actions">
+            <input class="search-input" type="text" placeholder="Buscar cliente..." oninput="filterClients(this.value)" id="search-clients">
+            <select class="search-input" style="width:130px" onchange="filterClientStatus(this.value)">
+              <option value="">Todos status</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+              <option value="prospecto">Prospecto</option>
+            </select>
+            <button class="btn btn-primary" onclick="openModalCliente()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Novo cliente
+            </button>
+          </div>
+        </div>
+        <div id="clientes-table-wrap">
+          <div class="loading"><div class="spinner"></div><br>Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAMPANHAS -->
+    <section class="section" id="section-campanhas">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Campanhas de marketing</div>
+          <div class="table-actions">
+            <select class="search-input" style="width:150px" onchange="filterCampanhaStatus(this.value)">
+              <option value="">Todos status</option>
+              <option value="rascunho">Rascunho</option>
+              <option value="agendada">Agendada</option>
+              <option value="em_andamento">Em andamento</option>
+              <option value="concluida">Concluída</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+            <button class="btn btn-primary" onclick="openModalCampanha()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nova campanha
+            </button>
+          </div>
+        </div>
+        <div id="campanhas-table-wrap">
+          <div class="loading"><div class="spinner"></div><br>Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERAÇÕES -->
+    <section class="section" id="section-interacoes">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Histórico de interações</div>
+          <div class="table-actions">
+            <select class="search-input" style="width:150px" onchange="filterInteracaoTipo(this.value)">
+              <option value="">Todos tipos</option>
+              <option value="email">Email</option>
+              <option value="ligacao">Ligação</option>
+              <option value="reuniao">Reunião</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="outro">Outro</option>
+            </select>
+            <button class="btn btn-primary" onclick="openModalInteracao()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nova interação
+            </button>
+          </div>
+        </div>
+        <div id="interacoes-list" style="padding:8px 20px">
+          <div class="loading"><div class="spinner"></div><br>Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAGS -->
+    <section class="section" id="section-tags">
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Tags de segmentação</div>
+          <div class="table-actions">
+            <button class="btn btn-primary" onclick="openModalTag()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nova tag
+            </button>
+          </div>
+        </div>
+        <div id="tags-wrap" style="padding:20px;display:flex;flex-wrap:wrap;gap:10px">
+          <div class="loading"><div class="spinner"></div><br>Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-cliente-title">Novo cliente</div>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cliente-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="cli-name" placeholder="Nome completo"></div>
+        <div class="form-group"><label class="form-label">Email *</label><input class="form-input" id="cli-email" type="email" placeholder="email@empresa.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Telefone</label><input class="form-input" id="cli-phone" placeholder="(41) 99999-0000"></div>
+        <div class="form-group"><label class="form-label">Empresa</label><input class="form-input" id="cli-company" placeholder="Nome da empresa"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">CPF / CNPJ</label><input class="form-input" id="cli-document" placeholder="000.000.000-00"></div>
+        <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="cli-website" placeholder="https://..."></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="cli-status">
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+            <option value="prospecto">Prospecto</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Origem</label><input class="form-input" id="cli-source" placeholder="indicação, site, evento..."></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Endereço</label><input class="form-input" id="cli-address" placeholder="Rua, número, cidade"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Notas</label><textarea class="form-textarea" id="cli-notes" placeholder="Observações sobre o cliente..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMPANHA -->
+<div class="modal-overlay" id="modal-campanha">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-campanha-title">Nova campanha</div>
+      <button class="modal-close" onclick="closeModal('modal-campanha')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="campanha-id">
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="camp-name" placeholder="Nome da campanha"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Canal</label>
+          <select class="form-select" id="camp-channel">
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="sms">SMS</option>
+            <option value="push">Push</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-select" id="camp-status">
+            <option value="rascunho">Rascunho</option>
+            <option value="agendada">Agendada</option>
+            <option value="em_andamento">Em andamento</option>
+            <option value="concluida">Concluída</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Segmento alvo</label>
+          <select class="form-select" id="camp-segment">
+            <option value="">Nenhum</option>
+            <option value="ativo">Ativos</option>
+            <option value="inativo">Inativos</option>
+            <option value="prospecto">Prospectos</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Agendamento</label><input class="form-input" id="camp-scheduled" type="datetime-local"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-textarea" id="camp-desc" placeholder="Objetivo da campanha..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-campanha')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCampanha()">Salvar campanha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INTERAÇÃO -->
+<div class="modal-overlay" id="modal-interacao">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Nova interação</div>
+      <button class="modal-close" onclick="closeModal('modal-interacao')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Cliente *</label>
+          <select class="form-select" id="int-client"></select>
+        </div>
+        <div class="form-group"><label class="form-label">Tipo *</label>
+          <select class="form-select" id="int-type">
+            <option value="email">Email</option>
+            <option value="ligacao">Ligação</option>
+            <option value="reuniao">Reunião</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Assunto</label><input class="form-input" id="int-subject" placeholder="Assunto da interação"></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-textarea" id="int-desc" placeholder="Detalhes da interação..."></textarea></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Resultado</label>
+          <select class="form-select" id="int-outcome">
+            <option value="">Não definido</option>
+            <option value="positivo">Positivo</option>
+            <option value="neutro">Neutro</option>
+            <option value="negativo">Negativo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-interacao')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarInteracao()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAG -->
+<div class="modal-overlay" id="modal-tag">
+  <div class="modal" style="width:340px">
+    <div class="modal-head">
+      <div class="modal-title">Nova tag</div>
+      <button class="modal-close" onclick="closeModal('modal-tag')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Nome *</label><input class="form-input" id="tag-name" placeholder="Ex: VIP, Tech, Varejo..."></div>
+      </div>
+      <div class="form-row full">
+        <div class="form-group"><label class="form-label">Cor</label><input class="form-input" id="tag-color" type="color" value="#6366f1" style="height:42px;padding:4px 8px;cursor:pointer"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-tag')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarTag()">Criar tag</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+let allClients = [], allCampaigns = [], allInteractions = [], allTags = [];
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.className = `toast ${type} show`;
+  document.getElementById('toast-msg').textContent = msg;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+const titles = { dashboard:'Dashboard', clientes:'Clientes', campanhas:'Campanhas', interacoes:'Interações', tags:'Tags' };
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`section-${name}`).classList.add('active');
+  event.currentTarget.classList.add('active');
+  document.getElementById('page-title').textContent = titles[name];
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'clientes') loadClientes();
+  if (name === 'campanhas') loadCampanhas();
+  if (name === 'interacoes') loadInteracoes();
+  if (name === 'tags') loadTags();
+}
+
+// ─── API HELPER ───────────────────────────────────────────────────────────────
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Erro na requisição');
+  return data;
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [stats, camps] = await Promise.all([api('/clients/stats'), api('/campaigns/')]);
+    document.getElementById('stat-total').textContent = stats.total;
+    document.getElementById('stat-ativos').textContent = stats.by_status.ativo || 0;
+    document.getElementById('stat-prospectos').textContent = stats.by_status.prospecto || 0;
+    document.getElementById('stat-campanhas').textContent = camps.length;
+
+    // Chart status
+    const total = stats.total || 1;
+    const statusChart = Object.entries(stats.by_status).map(([k, v]) => `
+      <div class="mini-bar">
+        <div class="mini-bar-label">${k}</div>
+        <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${Math.round(v/total*100)}%"></div></div>
+        <div class="mini-bar-val">${v}</div>
+      </div>`).join('');
+    document.getElementById('chart-status').innerHTML = statusChart || '<div class="empty">Sem dados</div>';
+
+    // Recent campaigns
+    const campHtml = camps.slice(0,5).map(c => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12px;font-weight:500">${c.name}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">${c.channel} · ${c.total_clients} clientes</div>
+        </div>
+        <span class="badge badge-${c.status}">${c.status}</span>
+      </div>`).join('');
+    document.getElementById('dash-campaigns').innerHTML = campHtml || '<div class="empty">Nenhuma campanha</div>';
+  } catch(e) { toast('Erro ao carregar dashboard', 'error'); }
+}
+
+// ─── CLIENTES ─────────────────────────────────────────────────────────────────
+async function loadClientes(search='', status='') {
+  const wrap = document.getElementById('clientes-table-wrap');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div><br>Carregando...</div>';
+  try {
+    let url = '/clients/?per_page=100';
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (status) url += `&status=${status}`;
+    const data = await api(url);
+    allClients = data.data;
+    renderClientes(allClients);
+  } catch(e) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">⚠</div>Erro ao carregar clientes</div>'; }
+}
+
+function renderClientes(clients) {
+  const wrap = document.getElementById('clientes-table-wrap');
+  if (!clients.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">👥</div>Nenhum cliente encontrado</div>'; return; }
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>Nome</th><th>Email</th><th>Empresa</th><th>Tags</th><th>Status</th><th>Ações</th>
+    </tr></thead>
+    <tbody>${clients.map(c => `<tr>
+      <td><strong>${c.name}</strong></td>
+      <td style="color:var(--text2)">${c.email}</td>
+      <td style="color:var(--text2)">${c.company || '—'}</td>
+      <td>${(c.tags||[]).map(t => `<span class="tag-pill" style="background:${t.color}22;color:${t.color}">${t.name}</span>`).join('')}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="editCliente(${c.id})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarCliente(${c.id})">✕</button>
+        </div>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+let searchTimer;
+function filterClients(v) { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadClientes(v, document.querySelector('#section-clientes select').value), 300); }
+function filterClientStatus(v) { loadClientes(document.getElementById('search-clients').value, v); }
+
+function openModalCliente(id = null) {
+  document.getElementById('cliente-id').value = '';
+  document.getElementById('modal-cliente-title').textContent = 'Novo cliente';
+  ['name','email','phone','company','document','website','source','address','notes'].forEach(f => document.getElementById(`cli-${f}`).value = '');
+  document.getElementById('cli-status').value = 'ativo';
+  openModal('modal-cliente');
+}
+
+async function editCliente(id) {
+  try {
+    const c = await api(`/clients/${id}`);
+    document.getElementById('cliente-id').value = c.id;
+    document.getElementById('modal-cliente-title').textContent = 'Editar cliente';
+    document.getElementById('cli-name').value = c.name || '';
+    document.getElementById('cli-email').value = c.email || '';
+    document.getElementById('cli-phone').value = c.phone || '';
+    document.getElementById('cli-company').value = c.company || '';
+    document.getElementById('cli-document').value = c.document || '';
+    document.getElementById('cli-website').value = c.website || '';
+    document.getElementById('cli-status').value = c.status || 'ativo';
+    document.getElementById('cli-source').value = c.source || '';
+    document.getElementById('cli-address').value = c.address || '';
+    document.getElementById('cli-notes').value = c.notes || '';
+    openModal('modal-cliente');
+  } catch(e) { toast('Erro ao carregar cliente', 'error'); }
+}
+
+async function salvarCliente() {
+  const id = document.getElementById('cliente-id').value;
+  const body = {
+    name: document.getElementById('cli-name').value,
+    email: document.getElementById('cli-email').value,
+    phone: document.getElementById('cli-phone').value,
+    company: document.getElementById('cli-company').value,
+    document: document.getElementById('cli-document').value,
+    website: document.getElementById('cli-website').value,
+    status: document.getElementById('cli-status').value,
+    source: document.getElementById('cli-source').value,
+    address: document.getElementById('cli-address').value,
+    notes: document.getElementById('cli-notes').value,
+  };
+  try {
+    if (id) await api(`/clients/${id}`, 'PUT', body);
+    else await api('/clients/', 'POST', body);
+    closeModal('modal-cliente');
+    toast(id ? 'Cliente atualizado!' : 'Cliente criado!');
+    loadClientes();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deletarCliente(id) {
+  if (!confirm('Remover este cliente?')) return;
+  try {
+    await api(`/clients/${id}`, 'DELETE');
+    toast('Cliente removido');
+    loadClientes();
+  } catch(e) { toast('Erro ao remover', 'error'); }
+}
+
+// ─── CAMPANHAS ────────────────────────────────────────────────────────────────
+async function loadCampanhas(status = '') {
+  const wrap = document.getElementById('campanhas-table-wrap');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div><br>Carregando...</div>';
+  try {
+    let url = '/campaigns/';
+    if (status) url += `?status=${status}`;
+    allCampaigns = await api(url);
+    renderCampanhas(allCampaigns);
+  } catch(e) { wrap.innerHTML = '<div class="empty">Erro ao carregar campanhas</div>'; }
+}
+
+function renderCampanhas(camps) {
+  const wrap = document.getElementById('campanhas-table-wrap');
+  if (!camps.length) { wrap.innerHTML = '<div class="empty"><div class="empty-icon">📣</div>Nenhuma campanha encontrada</div>'; return; }
+  const icons = { email:'📧', whatsapp:'💬', sms:'📱', push:'🔔' };
+  wrap.innerHTML = `<table>
+    <thead><tr><th>Campanha</th><th>Canal</th><th>Segmento</th><th>Clientes</th><th>Status</th><th>Ações</th></tr></thead>
+    <tbody>${camps.map(c => `<tr>
+      <td><strong>${c.name}</strong><br><span style="font-size:10px;color:var(--text3)">${c.description||''}</span></td>
+      <td>${icons[c.channel]||'📢'} ${c.channel}</td>
+      <td style="color:var(--text2)">${c.target_segment||'—'}</td>
+      <td style="color:var(--accent)">${c.total_clients}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${c.status !== 'concluida' ? `<button class="btn btn-secondary btn-sm" onclick="enviarCampanha(${c.id})" style="color:var(--accent)">Enviar</button>` : ''}
+          <button class="btn btn-secondary btn-sm" onclick="editCampanha(${c.id})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarCampanha(${c.id})">✕</button>
+        </div>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function filterCampanhaStatus(v) { loadCampanhas(v); }
+
+function openModalCampanha() {
+  document.getElementById('campanha-id').value = '';
+  document.getElementById('modal-campanha-title').textContent = 'Nova campanha';
+  document.getElementById('camp-name').value = '';
+  document.getElementById('camp-desc').value = '';
+  document.getElementById('camp-channel').value = 'email';
+  document.getElementById('camp-status').value = 'rascunho';
+  document.getElementById('camp-segment').value = '';
+  document.getElementById('camp-scheduled').value = '';
+  openModal('modal-campanha');
+}
+
+async function editCampanha(id) {
+  try {
+    const c = await api(`/campaigns/${id}`);
+    document.getElementById('campanha-id').value = c.id;
+    document.getElementById('modal-campanha-title').textContent = 'Editar campanha';
+    document.getElementById('camp-name').value = c.name || '';
+    document.getElementById('camp-desc').value = c.description || '';
+    document.getElementById('camp-channel').value = c.channel || 'email';
+    document.getElementById('camp-status').value = c.status || 'rascunho';
+    document.getElementById('camp-segment').value = c.target_segment || '';
+    document.getElementById('camp-scheduled').value = c.scheduled_at ? c.scheduled_at.slice(0,16) : '';
+    openModal('modal-campanha');
+  } catch(e) { toast('Erro ao carregar campanha', 'error'); }
+}
+
+async function salvarCampanha() {
+  const id = document.getElementById('campanha-id').value;
+  const scheduled = document.getElementById('camp-scheduled').value;
+  const body = {
+    name: document.getElementById('camp-name').value,
+    description: document.getElementById('camp-desc').value,
+    channel: document.getElementById('camp-channel').value,
+    status: document.getElementById('camp-status').value,
+    target_segment: document.getElementById('camp-segment').value || null,
+    scheduled_at: scheduled ? new Date(scheduled).toISOString() : null,
+  };
+  try {
+    if (id) await api(`/campaigns/${id}`, 'PUT', body);
+    else await api('/campaigns/', 'POST', body);
+    closeModal('modal-campanha');
+    toast(id ? 'Campanha atualizada!' : 'Campanha criada!');
+    loadCampanhas();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function enviarCampanha(id) {
+  if (!confirm('Marcar campanha como enviada?')) return;
+  try {
+    await api(`/campaigns/${id}/send`, 'POST');
+    toast('Campanha enviada!');
+    loadCampanhas();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deletarCampanha(id) {
+  if (!confirm('Remover esta campanha?')) return;
+  try {
+    await api(`/campaigns/${id}`, 'DELETE');
+    toast('Campanha removida');
+    loadCampanhas();
+  } catch(e) { toast('Erro ao remover', 'error'); }
+}
+
+// ─── INTERAÇÕES ───────────────────────────────────────────────────────────────
+async function loadInteracoes(tipo = '') {
+  const list = document.getElementById('interacoes-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><br>Carregando...</div>';
+  try {
+    let url = '/interactions/';
+    if (tipo) url += `?type=${tipo}`;
+    allInteractions = await api(url);
+    renderInteracoes(allInteractions);
+  } catch(e) { list.innerHTML = '<div class="empty">Erro ao carregar interações</div>'; }
+}
+
+const typeIcons = { email:'📧', ligacao:'📞', reuniao:'🤝', whatsapp:'💬', outro:'📋' };
+const outcomeColors = { positivo: 'var(--success)', neutro: 'var(--text2)', negativo: 'var(--danger)' };
+
+function renderInteracoes(items) {
+  const list = document.getElementById('interacoes-list');
+  if (!items.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">💬</div>Nenhuma interação</div>'; return; }
+  list.innerHTML = items.map(i => `
+    <div class="interaction-item">
+      <div class="interaction-icon">${typeIcons[i.type]||'📋'}</div>
+      <div class="interaction-body">
+        <div class="interaction-subject">${i.subject || i.type}</div>
+        <div class="interaction-desc">${i.description || '—'}</div>
+        <div class="interaction-meta">
+          <span>${i.type}</span>
+          ${i.outcome ? `<span style="color:${outcomeColors[i.outcome]||'var(--text3)'}">${i.outcome}</span>` : ''}
+          <span>${new Date(i.occurred_at).toLocaleDateString('pt-BR')}</span>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deletarInteracao(${i.id})">✕</button>
+    </div>`).join('');
+}
+
+function filterInteracaoTipo(v) { loadInteracoes(v); }
+
+async function openModalInteracao() {
+  // Load clients for select
+  if (!allClients.length) { const d = await api('/clients/?per_page=200'); allClients = d.data; }
+  const sel = document.getElementById('int-client');
+  sel.innerHTML = allClients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('int-subject').value = '';
+  document.getElementById('int-desc').value = '';
+  document.getElementById('int-type').value = 'email';
+  document.getElementById('int-outcome').value = '';
+  openModal('modal-interacao');
+}
+
+async function salvarInteracao() {
+  const body = {
+    client_id: parseInt(document.getElementById('int-client').value),
+    type: document.getElementById('int-type').value,
+    subject: document.getElementById('int-subject').value,
+    description: document.getElementById('int-desc').value,
+    outcome: document.getElementById('int-outcome').value || null,
+  };
+  try {
+    await api('/interactions/', 'POST', body);
+    closeModal('modal-interacao');
+    toast('Interação registrada!');
+    loadInteracoes();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deletarInteracao(id) {
+  if (!confirm('Remover esta interação?')) return;
+  try {
+    await api(`/interactions/${id}`, 'DELETE');
+    toast('Interação removida');
+    loadInteracoes();
+  } catch(e) { toast('Erro ao remover', 'error'); }
+}
+
+// ─── TAGS ─────────────────────────────────────────────────────────────────────
+async function loadTags() {
+  const wrap = document.getElementById('tags-wrap');
+  try {
+    allTags = await api('/tags/');
+    if (!allTags.length) { wrap.innerHTML = '<div class="empty">Nenhuma tag criada</div>'; return; }
+    wrap.innerHTML = allTags.map(t => `
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${t.color};flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:500">${t.name}</span>
+        <span style="font-size:10px;color:var(--text3)">${(t.clients||[]).length || ''}</span>
+        <button class="btn btn-danger btn-sm" onclick="deletarTag(${t.id})" style="margin-left:4px">✕</button>
+      </div>`).join('');
+  } catch(e) { wrap.innerHTML = '<div class="empty">Erro ao carregar tags</div>'; }
+}
+
+function openModalTag() {
+  document.getElementById('tag-name').value = '';
+  document.getElementById('tag-color').value = '#6366f1';
+  openModal('modal-tag');
+}
+
+async function salvarTag() {
+  const body = { name: document.getElementById('tag-name').value, color: document.getElementById('tag-color').value };
+  try {
+    await api('/tags/', 'POST', body);
+    closeModal('modal-tag');
+    toast('Tag criada!');
+    loadTags();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deletarTag(id) {
+  if (!confirm('Remover esta tag?')) return;
+  try {
+    await api(`/tags/${id}`, 'DELETE');
+    toast('Tag removida');
+    loadTags();
+  } catch(e) { toast('Erro ao remover', 'error'); }
+}
+
+// INIT
+loadDashboard();
+</script>
+</body>
+</html>
